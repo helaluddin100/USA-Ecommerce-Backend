@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
@@ -66,7 +67,22 @@ class ProductController extends Controller
 
     public function showBySlug(string $slug): JsonResponse
     {
-        $product = Product::where('slug', $slug)->where('is_active', true)->with('category')->first();
+        $product = Product::where('is_active', true)
+            ->with('category')
+            ->where(function ($q) use ($slug) {
+                $q->where('slug', $slug);
+                if (is_numeric($slug)) {
+                    $q->orWhere('id', (int) $slug);
+                }
+            })
+            ->first();
+
+        if (!$product) {
+            $product = Product::where('is_active', true)
+                ->with('category')
+                ->get()
+                ->first(fn (Product $p) => Str::slug($p->name) === $slug);
+        }
 
         if (!$product) {
             return response()->json(['message' => 'Product not found'], 404);
