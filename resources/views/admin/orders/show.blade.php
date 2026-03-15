@@ -26,15 +26,23 @@
                             'cancelled' => 'bg-red-500/10 text-red-300 border-red-500/40',
                             default => 'bg-gray-600 text-gray-200 border-gray-500',
                         };
-                        $payClass = match($order->payment_status ?? 'pending') {
+                        $payStatus = $order->payment_status ?? 'pending';
+                        $payClass = match($payStatus) {
                             'pending' => 'bg-amber-500/10 text-amber-300 border-amber-500/40',
                             'paid' => 'bg-emerald-500/10 text-emerald-300 border-emerald-500/40',
                             'failed' => 'bg-red-500/10 text-red-300 border-red-500/40',
+                            'cancelled' => 'bg-red-500/10 text-red-300 border-red-500/40',
                             default => 'bg-gray-600 text-gray-200 border-gray-500',
+                        };
+                        $payLabel = match($payStatus) {
+                            'paid' => 'Success',
+                            'failed' => 'Failed',
+                            'cancelled' => 'Cancelled',
+                            default => 'Pending',
                         };
                     @endphp
                     <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border {{ $statusClass }}">Order: {{ ucfirst($order->status) }}</span>
-                    <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border {{ $payClass }}">Payment: {{ ucfirst($order->payment_status ?? 'pending') }}</span>
+                    <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border {{ $payClass }}">Payment: {{ $payLabel }}</span>
                 </div>
             </div>
         </div>

@@ -45,8 +45,9 @@
                         <select name="payment_status" class="w-full text-sm rounded-xl border border-gray-700 bg-gray-900/80 text-gray-100 px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500/50">
                             <option value="">All</option>
                             <option value="pending" @selected(request('payment_status') === 'pending')>Pending</option>
-                            <option value="paid" @selected(request('payment_status') === 'paid')>Paid</option>
+                            <option value="paid" @selected(request('payment_status') === 'paid')>Success</option>
                             <option value="failed" @selected(request('payment_status') === 'failed')>Failed</option>
+                            <option value="cancelled" @selected(request('payment_status') === 'cancelled')>Cancelled</option>
                         </select>
                     </div>
                     <div class="flex items-end">
@@ -101,14 +102,22 @@
                         </td>
                         <td class="px-4 py-3">
                             @php
-                                $payClass = match($order->payment_status ?? 'pending') {
+                                $payStatus = $order->payment_status ?? 'pending';
+                                $payClass = match($payStatus) {
                                     'pending' => 'bg-amber-500/10 text-amber-300 border-amber-500/40',
                                     'paid' => 'bg-emerald-500/10 text-emerald-300 border-emerald-500/40',
                                     'failed' => 'bg-red-500/10 text-red-300 border-red-500/40',
+                                    'cancelled' => 'bg-red-500/10 text-red-300 border-red-500/40',
                                     default => 'bg-gray-600 text-gray-200 border-gray-500',
                                 };
+                                $payLabel = match($payStatus) {
+                                    'paid' => 'Success',
+                                    'failed' => 'Failed',
+                                    'cancelled' => 'Cancelled',
+                                    default => 'Pending',
+                                };
                             @endphp
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold border {{ $payClass }}">{{ ucfirst($order->payment_status ?? 'pending') }}</span>
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold border {{ $payClass }}">{{ $payLabel }}</span>
                         </td>
                         <td class="px-4 py-3 text-right">
                             <a href="{{ route('admin.orders.show', $order) }}"

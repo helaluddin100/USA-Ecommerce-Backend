@@ -8,10 +8,51 @@ use App\Models\OrderItem;
 use App\Services\EpsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
 
 class CheckoutController extends Controller
 {
+    /**
+     * Payment return/callback: EPS redirects here after payment. Update order payment_status and redirect to frontend.
+     */
+    public function paymentReturn(Request $request): RedirectResponse|JsonResponse
+    {
+        $orderNumber = $request->query('order');
+        $outcome = $request->query('outcome', '');
+        $redirectTo = $request->query('redirect');
+
+        if (! $orderNumber) {
+            return $redirectTo ? redirect($redirectTo) : response()->json(['message' => 'Missing order'], 422);
+        }
+
+        $order = Order::where('order_number', $orderNumber)->first();
+        if ($order) {
+            $status = match (strtolower($outcome)) {
+                'success' => 'paid',
+                'failed' => 'failed',
+                'cancelled', 'cancel' => 'cancelled',
+                default => null,
+            };
+            if ($status) {
+                $order->update(['payment_status' => $status]);
+            }
+        }
+
+        if (! $redirectTo) {
+            return response()->json(['message' => 'Order updated', 'order' => $order?->order_number]);
+        }
+
+        $url = $redirectTo;
+        $separator = str_contains($url, '?') ? '&' : '?';
+        $url .= $separator . http_build_query(array_filter([
+            'order' => $order?->order_number,
+            'payment' => $order ? ($order->payment_status ?? 'pending') : 'pending',
+        ]));
+
+        return redirect($url);
+    }
+
     /**
      * Create order from cart payload (guest or logged-in) and return EPS payment URL.
      */
@@ -74,16 +115,20 @@ class CheckoutController extends Controller
             ]);
         }
 
-        $successUrl = $data['success_url'] ?? config('services.eps.success_url', '');
-        $cancelUrl = $data['cancel_url'] ?? config('services.eps.cancel_url', '');
+        $frontendSuccess = $data['success_url'] ?? config('services.eps.success_url', '');
+        $frontendCancel = $data['cancel_url'] ?? config('services.eps.cancel_url', '');
+        $backendBase = rtrim(config('app.url'), '/');
+        $successCallback = $backendBase . '/api/checkout/payment-return?order=' . urlencode($order->order_number) . '&outcome=success&redirect=' . urlencode($frontendSuccess);
+        $cancelCallback = $backendBase . '/api/checkout/payment-return?order=' . urlencode($order->order_number) . '&outcome=cancelled&redirect=' . urlencode($frontendCancel);
+        $failCallback = $backendBase . '/api/checkout/payment-return?order=' . urlencode($order->order_number) . '&outcome=failed&redirect=' . urlencode($frontendSuccess);
         $eps = new EpsService();
         $paymentUrl = $eps->hasCredentials()
-            ? $eps->createPaymentLink($order, $successUrl, $cancelUrl)
+            ? $eps->createPaymentLink($order, $successCallback, $cancelCallback, $failCallback)
             : null;
         // Do NOT redirect to sandbox base URL with query params - that shows a blank page.
         // When EPS API does not return a real payment link, send user to our success page with pending flag.
-        if (! $paymentUrl && $successUrl) {
-            $paymentUrl = $this->appendQueryParams($successUrl, [
+        if (! $paymentUrl && $frontendSuccess) {
+            $paymentUrl = $this->appendQueryParams($frontendSuccess, [
                 'order' => $order->order_number,
                 'pending' => '1',
             ]);

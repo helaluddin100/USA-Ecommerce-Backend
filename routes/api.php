@@ -22,6 +22,7 @@ Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}', [CategoryController::class, 'show']);
 
 Route::post('/checkout', [CheckoutController::class, 'store']);
+Route::get('/checkout/payment-return', [CheckoutController::class, 'paymentReturn']);
 Route::get('/orders/track', [OrderController::class, 'track']);
 
 Route::get('/sliders', function () {

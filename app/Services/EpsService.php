@@ -88,8 +88,9 @@ class EpsService
      * API 02: Initialize Payment – POST /v1/EPSEngine/InitializeEPS
      * Header: x-hash (hash of merchantTransactionId), Authorization Bearer.
      * Returns RedirectURL to send customer to EPS payment page.
+     * Pass backend callback URLs so payment_status can be updated when EPS redirects.
      */
-    public function createPaymentLink(Order $order, string $successUrl, string $cancelUrl): ?string
+    public function createPaymentLink(Order $order, string $successUrl, string $cancelUrl, ?string $failUrl = null): ?string
     {
         $token = $this->getToken();
         if (! $token) {
@@ -119,7 +120,7 @@ class EpsService
             'ipAddress' => request()->ip() ?? '127.0.0.1',
             'version' => '1',
             'successUrl' => $successUrl,
-            'failUrl' => $cancelUrl,
+            'failUrl' => $failUrl ?? $cancelUrl,
             'cancelUrl' => $cancelUrl,
             'customerName' => $order->customer_name ?? 'Customer',
             'customerEmail' => $order->customer_email ?? '',
