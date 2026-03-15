@@ -16,7 +16,7 @@
                 </a>
             </li>
             <li>
-                <a href="#" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors">
+                <a href="{{ route('admin.orders.index') }}" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-700 transition-colors {{ request()->routeIs('admin.orders.*') ? 'bg-gray-800 dark:bg-gray-700' : '' }}">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
                     </svg>

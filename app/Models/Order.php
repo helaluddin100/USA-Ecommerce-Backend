@@ -10,7 +10,7 @@ class Order extends Model
 {
     protected $fillable = [
         'user_id', 'order_number', 'status', 'subtotal', 'shipping', 'tax', 'total',
-        'shipping_address', 'payment_method', 'customer_name', 'customer_email', 'customer_phone',
+        'shipping_address', 'payment_method', 'payment_status', 'customer_name', 'customer_email', 'customer_phone',
     ];
 
     protected $casts = [

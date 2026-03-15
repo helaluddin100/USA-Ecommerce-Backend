@@ -10,9 +10,29 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
+    /**
+     * Public: track order by order_number + customer_email (for guest orders).
+     */
+    public function track(Request $request): JsonResponse
+    {
+        $orderNumber = $request->query('order_number');
+        $email = $request->query('email');
+        if (! $orderNumber || ! $email) {
+            return response()->json(['message' => 'order_number and email are required'], 422);
+        }
+        $order = Order::where('order_number', $orderNumber)
+            ->where('customer_email', $email)
+            ->with('items')
+            ->first();
+        if (! $order) {
+            return response()->json(['message' => 'Order not found'], 404);
+        }
+        return response()->json($order);
+    }
+
     public function index(Request $request): JsonResponse
     {
-        $orders = $request->user()->orders()->with('items.product')->latest()->paginate(15);
+        $orders = $request->user()->orders()->with('items')->latest()->paginate(15);
 
         return response()->json($orders);
     }

@@ -52,6 +52,7 @@ class CheckoutController extends Controller
             'user_id' => $userId,
             'order_number' => Order::generateOrderNumber(),
             'status' => 'pending',
+            'payment_status' => 'pending',
             'subtotal' => $subtotal,
             'shipping' => $shipping,
             'tax' => $tax,
