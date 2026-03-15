@@ -7,9 +7,10 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 /**
- * EPS (Easy Payment System) Gateway – per "EPS Sandbox Merchant API Integration Guide_V4" PDF.
- * API Base: https://sandboxpgapi.eps.com.bd
+ * EPS (Easy Payment System) Gateway – per "EPS Merchant API Integration Guide V5" PDF.
+ * Sandbox: https://sandboxpgapi.eps.com.bd  |  Production (V5): https://pgapi.eps.com.bd
  * Hash: HMAC-SHA512(data, Hash Key) then Base64.
+ * Note: API docs (V4/V5) do not include a currency parameter; for USD display contact EPS.
  */
 class EpsService
 {
@@ -101,6 +102,7 @@ class EpsService
 
         $url = $this->baseUrl . '/v1/EPSEngine/InitializeEPS';
 
+        $currency = config('services.eps.currency', 'USD');
         $payload = [
             'merchantId' => $this->merchantId,
             'storeId' => $this->storeId,
@@ -110,6 +112,10 @@ class EpsService
             'financialEntityId' => 0,
             'transitionStatusId' => 0,
             'totalAmount' => (float) round($order->total, 2),
+            'Currency' => $currency,
+            'CurrencyCode' => $currency,
+            'currencyCode' => $currency,
+            'currency' => $currency,
             'ipAddress' => request()->ip() ?? '127.0.0.1',
             'version' => '1',
             'successUrl' => $successUrl,
@@ -131,7 +137,7 @@ class EpsService
             'ShipmentState' => '',
             'ShipmentPostcode' => '',
             'ShipmentCountry' => '',
-            'ValueA' => '',
+            'ValueA' => $currency,
             'ValueB' => '',
             'ValueC' => '',
             'ValueD' => '',
