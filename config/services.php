@@ -31,4 +31,10 @@ return [
         ],
     ],
 
+    'eps' => [
+        'payment_url' => env('EPS_PAYMENT_GATEWAY_URL', 'https://sandboxpg.eps.com.bd'),
+        'success_url' => env('EPS_SUCCESS_URL'),
+        'cancel_url' => env('EPS_CANCEL_URL'),
+    ],
+
 ];
