@@ -32,6 +32,7 @@ return [
     ],
 
     'eps' => [
+        // V5: Sandbox = https://sandboxpgapi.eps.com.bd | Production = https://pgapi.eps.com.bd
         'base_url' => env('EPS_BASE_URL', 'https://sandboxpgapi.eps.com.bd'),
         'merchant_id' => env('EPS_MERCHANT_ID'),
         'store_id' => env('EPS_STORE_ID'),
@@ -39,7 +40,7 @@ return [
         'password' => env('EPS_PASSWORD'),
         'hash_key' => env('EPS_HASH_KEY'),
         'currency' => env('EPS_CURRENCY', 'USD'),
-        'payment_url' => env('EPS_PAYMENT_GATEWAY_URL', 'https://sandboxpg.eps.com.bd'),
+        'payment_url' => env('EPS_PAYMENT_GATEWAY_URL', 'https://pg.eps.com.bd'),
         'success_url' => env('EPS_SUCCESS_URL'),
         'cancel_url' => env('EPS_CANCEL_URL'),
     ],
