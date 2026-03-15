@@ -16,8 +16,8 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div>
-                        <label for="title" class="block text-xs font-semibold text-gray-300 mb-1.5">Title <span class="text-red-500">*</span></label>
-                        <input type="text" id="title" name="title" value="{{ old('title', $slider->title) }}" placeholder="Slider title" required
+                        <label for="title" class="block text-xs font-semibold text-gray-300 mb-1.5">Title</label>
+                        <input type="text" id="title" name="title" value="{{ old('title', $slider->title) }}" placeholder="Slider title"
                                class="w-full rounded-lg border border-gray-700 bg-gray-900 text-sm text-gray-100 placeholder:text-gray-500 px-3 py-2 focus:ring-emerald-500 focus:border-emerald-500">
                         @error('title')<p class="mt-1 text-xs text-red-400">{{ $message }}</p>@enderror
                     </div>

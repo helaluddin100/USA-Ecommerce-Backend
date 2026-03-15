@@ -35,7 +35,7 @@ class SliderController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
+            'title' => ['nullable', 'string', 'max:255'],
             'subtitle' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'link' => ['nullable', 'string', 'max:500'],
@@ -79,7 +79,7 @@ class SliderController extends Controller
     public function update(Request $request, Slider $slider)
     {
         $data = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
+            'title' => ['nullable', 'string', 'max:255'],
             'subtitle' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'link' => ['nullable', 'string', 'max:500'],
