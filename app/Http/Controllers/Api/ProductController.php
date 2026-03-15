@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -10,6 +11,38 @@ use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
+    /**
+     * Top 10 products by total quantity ordered.
+     */
+    public function topSelling(Request $request): JsonResponse
+    {
+        $limit = min(20, max(1, (int) $request->get('limit', 10)));
+
+        $productIds = OrderItem::query()
+            ->selectRaw('product_id, SUM(quantity) as total_sold')
+            ->whereNotNull('product_id')
+            ->groupBy('product_id')
+            ->orderByDesc('total_sold')
+            ->limit($limit)
+            ->pluck('product_id')
+            ->filter()
+            ->values()
+            ->toArray();
+
+        if (empty($productIds)) {
+            return response()->json([]);
+        }
+
+        $products = Product::with('category')
+            ->where('is_active', true)
+            ->whereIn('id', $productIds)
+            ->get()
+            ->sortBy(fn (Product $p) => array_search($p->id, $productIds))
+            ->values();
+
+        return response()->json($products);
+    }
+
     public function index(Request $request): JsonResponse
     {
         $query = Product::with('category')->where('is_active', true);
