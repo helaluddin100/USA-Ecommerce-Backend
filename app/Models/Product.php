@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class Product extends Model
 {
@@ -23,5 +24,19 @@ class Product extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        if (!$this->image) {
+            return null;
+        }
+        if (str_starts_with($this->image, 'http') || str_starts_with($this->image, '/')) {
+            return $this->image;
+        }
+        if (str_contains($this->image, '/') || str_contains($this->image, '.')) {
+            return Storage::disk('public')->url($this->image);
+        }
+        return null;
     }
 }

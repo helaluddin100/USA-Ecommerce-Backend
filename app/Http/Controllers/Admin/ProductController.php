@@ -7,6 +7,9 @@ use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class ProductController extends Controller
 {
@@ -66,7 +69,8 @@ class ProductController extends Controller
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
             'old_price' => ['nullable', 'numeric', 'min:0'],
-            'image' => ['nullable', 'string', 'max:255'],
+            'image' => ['nullable'],
+            'image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
             'badge' => ['nullable', 'string', 'max:50'],
             'stock' => ['nullable', 'integer', 'min:0'],
             'is_new' => ['nullable', 'boolean'],
@@ -74,11 +78,18 @@ class ProductController extends Controller
             'is_active' => ['required', 'boolean'],
         ]);
 
-        $data['slug'] = $data['slug'] ?: Str::slug($data['name']);
-        $data['is_new'] = (bool) ($data['is_new'] ?? false);
-        $data['on_sale'] = (bool) ($data['on_sale'] ?? false);
+        $data['slug'] = trim((string) ($data['slug'] ?? '')) !== '' ? $data['slug'] : Str::slug($data['name']);
+        $data['is_new'] = (bool) ($request->boolean('is_new'));
+        $data['on_sale'] = (bool) ($request->boolean('on_sale'));
         $data['stock'] = (int) ($data['stock'] ?? 0);
 
+        if ($request->hasFile('image_file')) {
+            $data['image'] = $this->uploadProductImage($request->file('image_file'));
+        } else {
+            $data['image'] = $request->input('image'); // emoji or URL fallback
+        }
+
+        unset($data['image_file']);
         Product::create($data);
 
         return redirect()->route('admin.products.index')->with('success', 'Product created successfully.');
@@ -99,7 +110,8 @@ class ProductController extends Controller
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
             'old_price' => ['nullable', 'numeric', 'min:0'],
-            'image' => ['nullable', 'string', 'max:255'],
+            'image' => ['nullable', 'string'],
+            'image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
             'badge' => ['nullable', 'string', 'max:50'],
             'stock' => ['nullable', 'integer', 'min:0'],
             'is_new' => ['nullable', 'boolean'],
@@ -107,11 +119,21 @@ class ProductController extends Controller
             'is_active' => ['required', 'boolean'],
         ]);
 
-        $data['slug'] = $data['slug'] ?: Str::slug($data['name']);
-        $data['is_new'] = (bool) ($data['is_new'] ?? false);
-        $data['on_sale'] = (bool) ($data['on_sale'] ?? false);
+        $data['slug'] = trim((string) ($data['slug'] ?? '')) !== '' ? $data['slug'] : Str::slug($data['name']);
+        $data['is_new'] = (bool) ($request->boolean('is_new'));
+        $data['on_sale'] = (bool) ($request->boolean('on_sale'));
         $data['stock'] = (int) ($data['stock'] ?? 0);
 
+        if ($request->hasFile('image_file')) {
+            if ($product->image && !str_starts_with($product->image, 'http') && $product->image !== '') {
+                Storage::disk('public')->delete($product->image);
+            }
+            $data['image'] = $this->uploadProductImage($request->file('image_file'));
+        } else {
+            $data['image'] = $request->input('image', $product->image);
+        }
+
+        unset($data['image_file']);
         $product->update($data);
 
         return redirect()->route('admin.products.index')->with('success', 'Product updated successfully.');
@@ -119,7 +141,20 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
+        if ($product->image && !str_starts_with($product->image, 'http')) {
+            Storage::disk('public')->delete($product->image);
+        }
         $product->delete();
         return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully.');
+    }
+
+    private function uploadProductImage($file): string
+    {
+        $manager = new ImageManager(new Driver());
+        $image = $manager->read($file->getRealPath());
+        $filename = 'product_' . uniqid() . '.webp';
+        $path = 'products/' . $filename;
+        Storage::disk('public')->put($path, (string) $image->toWebp());
+        return $path;
     }
 }

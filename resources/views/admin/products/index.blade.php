@@ -107,8 +107,10 @@
                 @forelse ($products as $product)
                     <tr class="hover:bg-gray-900/80 transition-colors">
                         <td class="px-4 py-3">
-                            @if($product->image)
-                                <span class="text-2xl">{{ $product->image }}</span>
+                            @if($product->image_url)
+                                <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="w-12 h-12 rounded-lg object-cover border border-gray-700">
+                            @elseif($product->image && mb_strlen($product->image) <= 4)
+                                <span class="text-2xl w-10 h-10 flex items-center justify-center">{{ $product->image }}</span>
                             @else
                                 <span class="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center text-gray-500 text-sm">—</span>
                             @endif
