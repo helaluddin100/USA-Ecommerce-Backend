@@ -63,6 +63,12 @@
         </div>
     </div>
 
+    @if (session('success'))
+        <div class="mb-4 px-4 py-3 rounded-lg bg-emerald-500/10 text-emerald-300 text-sm border border-emerald-500/30">
+            {{ session('success') }}
+        </div>
+    @endif
+
     <div class="bg-gray-950/90 dark:bg-gray-900 rounded-2xl shadow-2xl shadow-black/40 border border-gray-800 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-800">
@@ -120,10 +126,27 @@
                             <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold border {{ $payClass }}">{{ $payLabel }}</span>
                         </td>
                         <td class="px-4 py-3 text-right">
-                            <a href="{{ route('admin.orders.show', $order) }}"
-                               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-400/60 text-blue-300 hover:bg-blue-500/20 text-sm font-medium">
-                                View
-                            </a>
+                            <div class="inline-flex items-center gap-2">
+                                <a href="{{ route('admin.orders.show', $order) }}"
+                                   class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-blue-500/10 border border-blue-400/60 text-blue-300 hover:bg-blue-500/20 transition"
+                                   title="View">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                </a>
+                                <form action="{{ route('admin.orders.destroy', $order) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this order? This cannot be undone.');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit"
+                                            class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-red-500/10 border border-red-400/60 text-red-300 hover:bg-red-500/20 transition"
+                                            title="Delete">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4a1 1 0 011 1v2H9V4a1 1 0 011-1z"></path>
+                                        </svg>
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 @empty
