@@ -8,12 +8,14 @@ window.$ = window.jQuery = $;
 function initSelect2() {
     if (typeof $.fn.select2 !== 'function') return;
 
-    $('.js-select2').each(function () {
+    $('select').each(function () {
         const $el = $(this);
         if ($el.data('select2')) return;
+        if ($el.hasClass('no-select2')) return;
 
         $el.select2({
             width: '100%',
+            theme: 'default',
         });
     });
 }

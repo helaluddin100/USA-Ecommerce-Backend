@@ -44,7 +44,7 @@
                                 Country <span class="text-red-500">*</span>
                             </label>
                             <select name="country" id="country" required
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                class="js-select2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                                 <option value="">Choose country</option>
                                 @include('partials.countries')
                             </select>
@@ -229,7 +229,7 @@
                                 Type of Business <span class="text-red-500">*</span>
                             </label>
                             <select name="type_of_business" id="type_of_business" required
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                class="js-select2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                                 <option value="">Select business type</option>
                                 <option value="retailer" {{ old('type_of_business') == 'retailer' ? 'selected' : '' }}>Retailer</option>
                                 <option value="wholesaler" {{ old('type_of_business') == 'wholesaler' ? 'selected' : '' }}>Wholesaler</option>
@@ -248,7 +248,7 @@
                                 Registration path <span class="text-red-500">*</span>
                             </label>
                             <select name="registration_path" id="registration_path" required
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                class="js-select2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                                 <option value="">Path selection</option>
                                 <option value="stylekorean" {{ old('registration_path') == 'stylekorean' ? 'selected' : '' }}>StyleKorean</option>
                                 <option value="google" {{ old('registration_path') == 'google' ? 'selected' : '' }}>Google</option>
