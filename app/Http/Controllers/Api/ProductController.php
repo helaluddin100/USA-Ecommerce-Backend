@@ -63,4 +63,15 @@ class ProductController extends Controller
 
         return response()->json($product);
     }
+
+    public function showBySlug(string $slug): JsonResponse
+    {
+        $product = Product::where('slug', $slug)->where('is_active', true)->with('category')->first();
+
+        if (!$product) {
+            return response()->json(['message' => 'Product not found'], 404);
+        }
+
+        return response()->json($product);
+    }
 }
