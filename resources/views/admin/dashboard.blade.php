@@ -11,12 +11,13 @@
                     <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Total Revenue</p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-2">
                         ${{ number_format($stats['total_revenue'], 2) }}</p>
-                    <p class="text-green-600 dark:text-green-400 text-sm mt-2 flex items-center">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                        </svg>
-                        +{{ $stats['revenue_growth'] }}%
+                    <p class="text-sm mt-2 flex items-center {{ $stats['revenue_growth'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
+                        @if($stats['revenue_growth'] >= 0)
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                        @else
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path></svg>
+                        @endif
+                        {{ $stats['revenue_growth'] >= 0 ? '+' : '' }}{{ $stats['revenue_growth'] }}%
                     </p>
                 </div>
                 <div class="bg-blue-100 dark:bg-blue-900 p-3 rounded-full">
@@ -36,12 +37,13 @@
                     <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Total Orders</p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-2">
                         {{ number_format($stats['total_orders']) }}</p>
-                    <p class="text-green-600 dark:text-green-400 text-sm mt-2 flex items-center">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                        </svg>
-                        +{{ $stats['orders_growth'] }}%
+                    <p class="text-sm mt-2 flex items-center {{ $stats['orders_growth'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
+                        @if($stats['orders_growth'] >= 0)
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                        @else
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path></svg>
+                        @endif
+                        {{ $stats['orders_growth'] >= 0 ? '+' : '' }}{{ $stats['orders_growth'] }}%
                     </p>
                 </div>
                 <div class="bg-green-100 dark:bg-green-900 p-3 rounded-full">
@@ -111,6 +113,33 @@
         </div>
     </div>
 
+    <!-- Order & Payment Summary -->
+    <div class="mb-8">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Order & Payment Summary</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700">
+                <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Total Orders</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">{{ number_format($stats['total_orders']) }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Total amount: <span class="font-semibold text-gray-900 dark:text-gray-100">${{ number_format($stats['total_orders_amount'], 2) }}</span></p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border-l-4 border-green-500">
+                <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Payment Success</p>
+                <p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">{{ number_format($stats['success_orders_count']) }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Amount: <span class="font-semibold text-green-700 dark:text-green-300">${{ number_format($stats['success_orders_amount'], 2) }}</span></p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border-l-4 border-red-500">
+                <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Payment Failed</p>
+                <p class="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">{{ number_format($stats['failed_orders_count']) }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Amount: <span class="font-semibold text-red-700 dark:text-red-300">${{ number_format($stats['failed_orders_amount'], 2) }}</span></p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700">
+                <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Pending / Cancelled</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">{{ number_format($stats['pending_orders_count'] + $stats['cancelled_orders_count']) }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Pending: ${{ number_format($stats['pending_orders_amount'], 2) }} · Cancelled: ${{ number_format($stats['cancelled_orders_amount'], 2) }}</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Charts Row -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <!-- Revenue Chart -->
@@ -153,7 +182,7 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        @foreach ($topCustomers as $customer)
+                        @forelse ($topCustomers as $customer)
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -167,7 +196,9 @@
                                         ${{ number_format($customer['revenue'], 2) }}</div>
                                 </td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr><td colspan="3" class="px-6 py-6 text-center text-sm text-gray-500">No orders yet.</td></tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
@@ -194,7 +225,7 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        @foreach ($topProducts as $product)
+                        @forelse ($topProducts as $product)
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -209,7 +240,9 @@
                                         ${{ number_format($product['revenue'], 2) }}</div>
                                 </td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr><td colspan="3" class="px-6 py-6 text-center text-sm text-gray-500">No sales yet.</td></tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
@@ -243,11 +276,10 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    @foreach ($recentOrders as $order)
+                    @forelse ($recentOrders as $order)
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $order['id'] }}
-                                </div>
+                                <a href="{{ route('admin.orders.show', $order['id']) }}" class="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline">{{ $order['order_number'] ?? $order['id'] }}</a>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900 dark:text-gray-300">{{ $order['customer'] }}</div>
@@ -259,26 +291,31 @@
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @php
                                     $statusColors = [
-                                        'completed' =>
-                                            'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200',
+                                        'paid' => 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200',
+                                        'completed' => 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200',
+                                        'delivered' => 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200',
                                         'processing' => 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200',
-                                        'pending' =>
-                                            'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200',
+                                        'shipped' => 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200',
+                                        'pending' => 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200',
+                                        'failed' => 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200',
+                                        'cancelled' => 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200',
                                     ];
-                                    $color =
-                                        $statusColors[$order['status']] ??
-                                        'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
+                                    $statusLabel = $order['status'] === 'paid' ? 'Success' : ucfirst($order['status']);
+                                    $color = $statusColors[$order['status']] ?? 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
                                 @endphp
-                                <span
-                                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $color }}">
-                                    {{ ucfirst($order['status']) }}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $color }}">
+                                    {{ $statusLabel }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900 dark:text-gray-300">{{ $order['date'] }}</div>
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="5" class="px-6 py-8 text-center text-sm text-gray-500">No orders yet.</td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>

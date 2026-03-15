@@ -3,59 +3,148 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Product;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        // Mock data for B2B analytics - replace with actual database queries
+        $now = now();
+        $last30Start = $now->copy()->subDays(30);
+        $prev30Start = $now->copy()->subDays(60);
+
+        // Total revenue (all orders)
+        $totalRevenue = (float) Order::sum('total');
+        $totalOrders = Order::count();
+        $totalProducts = Product::count();
+
+        // Order amounts by payment status
+        $totalOrdersAmount = $totalRevenue;
+        $failedOrdersCount = Order::where('payment_status', 'failed')->count();
+        $failedOrdersAmount = (float) Order::where('payment_status', 'failed')->sum('total');
+        $successOrdersCount = Order::where('payment_status', 'paid')->count();
+        $successOrdersAmount = (float) Order::where('payment_status', 'paid')->sum('total');
+        $pendingOrdersCount = Order::where(function ($q) {
+            $q->where('payment_status', 'pending')->orWhereNull('payment_status');
+        })->count();
+        $pendingOrdersAmount = (float) Order::where(function ($q) {
+            $q->where('payment_status', 'pending')->orWhereNull('payment_status');
+        })->sum('total');
+        $cancelledOrdersCount = Order::where('payment_status', 'cancelled')->count();
+        $cancelledOrdersAmount = (float) Order::where('payment_status', 'cancelled')->sum('total');
+
+        // Unique customers: distinct by customer_email or 'u'+user_id
+        $customersCount = Order::selectRaw("COALESCE(customer_email, CONCAT('u', COALESCE(user_id, 0))) as k")
+            ->distinct()
+            ->pluck('k')
+            ->count();
+        $totalCustomers = $customersCount;
+
+        // Average order value
+        $averageOrderValue = $totalOrders > 0 ? round($totalRevenue / $totalOrders, 2) : 0;
+
+        // Revenue growth: last 30 days vs previous 30 days
+        $revenueLast30 = (float) Order::where('created_at', '>=', $last30Start)->sum('total');
+        $revenuePrev30 = (float) Order::where('created_at', '>=', $prev30Start)->where('created_at', '<', $last30Start)->sum('total');
+        $revenueGrowth = $revenuePrev30 > 0
+            ? round((($revenueLast30 - $revenuePrev30) / $revenuePrev30) * 100, 1)
+            : ($revenueLast30 > 0 ? 100 : 0);
+
+        // Orders growth
+        $ordersLast30 = Order::where('created_at', '>=', $last30Start)->count();
+        $ordersPrev30 = Order::where('created_at', '>=', $prev30Start)->where('created_at', '<', $last30Start)->count();
+        $ordersGrowth = $ordersPrev30 > 0
+            ? round((($ordersLast30 - $ordersPrev30) / $ordersPrev30) * 100, 1)
+            : ($ordersLast30 > 0 ? 100 : 0);
+
+        // Conversion rate: we don't have visitors; use orders/products ratio as placeholder or 0
+        $conversionRate = $totalProducts > 0 ? round(($totalOrders / max(1, $totalProducts)) * 100, 1) : 0;
+
         $stats = [
-            'total_revenue' => 1250000,
-            'total_orders' => 3420,
-            'total_customers' => 856,
-            'total_products' => 1240,
-            'average_order_value' => 365.50,
-            'conversion_rate' => 3.2,
-            'revenue_growth' => 12.5,
-            'orders_growth' => 8.3,
+            'total_revenue' => $totalRevenue,
+            'total_orders' => $totalOrders,
+            'total_customers' => $totalCustomers,
+            'total_products' => $totalProducts,
+            'average_order_value' => $averageOrderValue,
+            'conversion_rate' => min(100, $conversionRate),
+            'revenue_growth' => $revenueGrowth,
+            'orders_growth' => $ordersGrowth,
+            // Order & payment breakdown
+            'total_orders_amount' => $totalOrdersAmount,
+            'failed_orders_count' => $failedOrdersCount,
+            'failed_orders_amount' => $failedOrdersAmount,
+            'success_orders_count' => $successOrdersCount,
+            'success_orders_amount' => $successOrdersAmount,
+            'pending_orders_count' => $pendingOrdersCount,
+            'pending_orders_amount' => $pendingOrdersAmount,
+            'cancelled_orders_count' => $cancelledOrdersCount,
+            'cancelled_orders_amount' => $cancelledOrdersAmount,
         ];
 
-        // Sales data for last 12 months
+        // Last 12 months: labels and revenue/orders per month
         $monthlySales = [
-            'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-            'revenue' => [85000, 92000, 78000, 105000, 112000, 98000, 125000, 118000, 132000, 145000, 138000, 150000],
-            'orders' => [280, 310, 265, 340, 365, 320, 410, 390, 435, 480, 455, 490],
+            'labels' => [],
+            'revenue' => [],
+            'orders' => [],
         ];
+        for ($i = 11; $i >= 0; $i--) {
+            $monthStart = $now->copy()->subMonths($i)->startOfMonth();
+            $monthEnd = $monthStart->copy()->endOfMonth();
+            $monthlySales['labels'][] = $monthStart->format('M');
+            $monthlySales['revenue'][] = (float) Order::whereBetween('created_at', [$monthStart, $monthEnd])->sum('total');
+            $monthlySales['orders'][] = Order::whereBetween('created_at', [$monthStart, $monthEnd])->count();
+        }
 
-        // Top customers
-        $topCustomers = [
-            ['name' => 'ABC Corporation', 'orders' => 145, 'revenue' => 125000],
-            ['name' => 'XYZ Industries', 'orders' => 132, 'revenue' => 118000],
-            ['name' => 'Global Trading Co.', 'orders' => 128, 'revenue' => 112000],
-            ['name' => 'Tech Solutions Ltd.', 'orders' => 115, 'revenue' => 98000],
-            ['name' => 'Manufacturing Inc.', 'orders' => 108, 'revenue' => 92000],
-        ];
+        // Top customers by revenue (unique by email or user)
+        $ordersForCustomers = Order::with('user')->get();
+        $byCustomer = $ordersForCustomers->groupBy(function ($o) {
+            return $o->customer_email ?? 'u' . (int) $o->user_id;
+        });
+        $topCustomers = $byCustomer->map(function ($group) {
+            $first = $group->first();
+            return [
+                'name' => $first->customer_name ?: $first->user?->name ?? 'Guest',
+                'orders' => $group->count(),
+                'revenue' => (float) $group->sum('total'),
+            ];
+        })->sortByDesc('revenue')->take(5)->values()->toArray();
 
-        // Top products
-        $topProducts = [
-            ['name' => 'Product A', 'sales' => 1240, 'revenue' => 186000],
-            ['name' => 'Product B', 'sales' => 1120, 'revenue' => 168000],
-            ['name' => 'Product C', 'sales' => 980, 'revenue' => 147000],
-            ['name' => 'Product D', 'sales' => 850, 'revenue' => 127500],
-            ['name' => 'Product E', 'sales' => 720, 'revenue' => 108000],
-        ];
+        // Top products by revenue (from order_items)
+        $topProducts = OrderItem::query()
+            ->select('product_name')
+            ->selectRaw('SUM(quantity) as sales')
+            ->selectRaw('SUM(quantity * price) as revenue')
+            ->groupBy('product_name')
+            ->orderByDesc('revenue')
+            ->limit(5)
+            ->get()
+            ->map(fn ($r) => [
+                'name' => $r->product_name,
+                'sales' => (int) $r->sales,
+                'revenue' => (float) $r->revenue,
+            ])
+            ->toArray();
 
         // Recent orders
-        $recentOrders = [
-            ['id' => '#ORD-001', 'customer' => 'ABC Corporation', 'amount' => 12500, 'status' => 'completed', 'date' => '2024-12-28'],
-            ['id' => '#ORD-002', 'customer' => 'XYZ Industries', 'amount' => 9800, 'status' => 'processing', 'date' => '2024-12-28'],
-            ['id' => '#ORD-003', 'customer' => 'Global Trading Co.', 'amount' => 15200, 'status' => 'completed', 'date' => '2024-12-27'],
-            ['id' => '#ORD-004', 'customer' => 'Tech Solutions Ltd.', 'amount' => 8700, 'status' => 'pending', 'date' => '2024-12-27'],
-            ['id' => '#ORD-005', 'customer' => 'Manufacturing Inc.', 'amount' => 11200, 'status' => 'completed', 'date' => '2024-12-26'],
-        ];
+        $recentOrders = Order::with('user')
+            ->latest()
+            ->limit(10)
+            ->get()
+            ->map(function ($order) {
+                $status = $order->payment_status ?? $order->status ?? 'pending';
+                return [
+                    'id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'customer' => $order->customer_name ?: $order->user?->name ?? $order->customer_email ?? '—',
+                    'amount' => (float) $order->total,
+                    'status' => $status,
+                    'date' => $order->created_at->format('Y-m-d'),
+                ];
+            })
+            ->toArray();
 
         return view('admin.dashboard', compact('stats', 'monthlySales', 'topCustomers', 'topProducts', 'recentOrders'));
     }
 }
-
