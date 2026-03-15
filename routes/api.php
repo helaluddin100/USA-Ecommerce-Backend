@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\WishlistController;
+use App\Http\Controllers\Api\ContactController;
 use App\Models\Slider;
 
 // Public routes
@@ -25,6 +26,7 @@ Route::get('/categories/{category}', [CategoryController::class, 'show']);
 Route::post('/checkout', [CheckoutController::class, 'store']);
 Route::get('/checkout/payment-return', [CheckoutController::class, 'paymentReturn']);
 Route::get('/orders/track', [OrderController::class, 'track']);
+Route::post('/contact', [ContactController::class, 'store']);
 
 Route::get('/sliders', function () {
     return Slider::where('is_active', true)

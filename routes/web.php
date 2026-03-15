@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\SliderController;
 use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\ContactController;
 use App\Http\Controllers\Auth\LoginController;
 
 Route::get('/', function () {
@@ -43,6 +44,9 @@ Route::middleware(['auth', 'role:super_admin,admin'])->prefix('admin')->name('ad
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
+
+    // Contacts
+    Route::get('/contacts', [ContactController::class, 'index'])->name('contacts.index');
 
     // Bulk Orders
     Route::get('/bulk-orders', [BulkOrderController::class, 'index'])->name('bulk-orders.index');
