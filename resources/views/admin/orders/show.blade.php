@@ -117,4 +117,56 @@
             </table>
         </div>
     </div>
+
+    <div class="bg-gray-950/90 dark:bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden mt-6">
+        <div class="px-4 py-3 border-b border-gray-800 bg-gray-900/80">
+            <h2 class="text-sm font-semibold text-gray-200">Payment History</h2>
+            <p class="text-xs text-gray-500 mt-0.5">Callback/fallback data from payment gateway</p>
+        </div>
+        <div class="p-4 sm:p-6">
+            @forelse($order->paymentHistories as $ph)
+                <div class="border border-gray-700 rounded-xl p-4 mb-4 last:mb-0 bg-gray-900/50">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="text-sm font-medium text-gray-200">{{ $ph->gateway_name }} / {{ $ph->payment_method }}</span>
+                            <span class="text-xs text-gray-500">Order #{{ $ph->order_number }}</span>
+                            @php
+                                $phStatusClass = match($ph->status) {
+                                    'paid' => 'bg-emerald-500/10 text-emerald-300 border-emerald-500/40',
+                                    'failed' => 'bg-red-500/10 text-red-300 border-red-500/40',
+                                    'cancelled' => 'bg-red-500/10 text-red-300 border-red-500/40',
+                                    default => 'bg-amber-500/10 text-amber-300 border-amber-500/40',
+                                };
+                                $phLabel = match($ph->status) {
+                                    'paid' => 'Success',
+                                    'failed' => 'Failed',
+                                    'cancelled' => 'Cancelled',
+                                    default => 'Pending',
+                                };
+                            @endphp
+                            <span class="inline-flex px-2 py-0.5 rounded text-[11px] font-semibold border {{ $phStatusClass }}">{{ $phLabel }}</span>
+                        </div>
+                        <div class="text-sm">
+                            <span class="font-semibold text-white">${{ number_format($ph->amount, 2) }}</span>
+                            <span class="text-gray-500"> {{ $ph->currency }}</span>
+                        </div>
+                    </div>
+                    <div class="text-xs text-gray-400 space-y-0.5">
+                        <p>At {{ $ph->created_at->format('M d, Y H:i:s') }} @if($ph->transaction_id) · Trx: {{ $ph->transaction_id }} @endif</p>
+                        @if($ph->ip_address)
+                            <p>IP: {{ $ph->ip_address }}</p>
+                        @endif
+                    </div>
+                    @if($ph->raw_callback && count($ph->raw_callback) > 0)
+                        <details class="mt-3">
+                            <summary class="text-xs font-medium text-gray-400 cursor-pointer hover:text-gray-300">Full callback data</summary>
+                            <pre class="mt-2 p-3 rounded-lg bg-gray-950 text-[11px] text-gray-400 overflow-x-auto border border-gray-800">{{ json_encode($ph->raw_callback, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>
+                        </details>
+                    @endif
+                </div>
+            @empty
+                <p class="text-sm text-gray-500">No payment history recorded yet.</p>
+            @endforelse
+        </div>
+    </div>
 @endsection

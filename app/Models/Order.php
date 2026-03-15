@@ -30,6 +30,11 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    public function paymentHistories(): HasMany
+    {
+        return $this->hasMany(PaymentHistory::class);
+    }
+
     public static function generateOrderNumber(): string
     {
         return 'ORD-' . strtoupper(uniqid()) . '-' . now()->format('Ymd');

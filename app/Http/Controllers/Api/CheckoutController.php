@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\PaymentHistory;
 use App\Services\EpsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -37,6 +38,24 @@ class CheckoutController extends Controller
             if ($status) {
                 $order->update(['payment_status' => $status]);
             }
+            // Store payment history / callback data (method, order, amount, full callback payload)
+            PaymentHistory::create([
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
+                'payment_method' => $order->payment_method ?? 'eps',
+                'gateway_name' => 'eps',
+                'amount' => $order->total,
+                'currency' => 'USD',
+                'status' => $status ?? 'pending',
+                'transaction_id' => $request->query('transaction_id') ?? $request->query('trx_id') ?? $request->input('transaction_id'),
+                'raw_callback' => [
+                    'query' => $request->query(),
+                    'input' => $request->all(),
+                    'outcome' => $outcome,
+                ],
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
         }
 
         if (! $redirectTo) {

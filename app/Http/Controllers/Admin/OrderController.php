@@ -35,7 +35,7 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
-        $order->load('items');
+        $order->load(['items', 'paymentHistories']);
 
         return view('admin.orders.show', compact('order'));
     }
