@@ -32,6 +32,12 @@ return [
     ],
 
     'eps' => [
+        'base_url' => env('EPS_BASE_URL', 'https://sandboxpgapi.eps.com.bd'),
+        'merchant_id' => env('EPS_MERCHANT_ID'),
+        'store_id' => env('EPS_STORE_ID'),
+        'username' => env('EPS_USERNAME'),
+        'password' => env('EPS_PASSWORD'),
+        'hash_key' => env('EPS_HASH_KEY'),
         'payment_url' => env('EPS_PAYMENT_GATEWAY_URL', 'https://sandboxpg.eps.com.bd'),
         'success_url' => env('EPS_SUCCESS_URL'),
         'cancel_url' => env('EPS_CANCEL_URL'),

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Services\EpsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -72,7 +73,25 @@ class CheckoutController extends Controller
             ]);
         }
 
-        $paymentUrl = $this->buildEpsPaymentUrl($order, $data['success_url'] ?? null, $data['cancel_url'] ?? null);
+        $successUrl = $data['success_url'] ?? config('services.eps.success_url', '');
+        $cancelUrl = $data['cancel_url'] ?? config('services.eps.cancel_url', '');
+        $eps = new EpsService();
+        $paymentUrl = $eps->hasCredentials()
+            ? $eps->createPaymentLink($order, $successUrl, $cancelUrl)
+            : null;
+        // Do NOT redirect to sandbox base URL with query params - that shows a blank page.
+        // When EPS API does not return a real payment link, send user to our success page with pending flag.
+        if (! $paymentUrl && $successUrl) {
+            $paymentUrl = $this->appendQueryParams($successUrl, [
+                'order' => $order->order_number,
+                'pending' => '1',
+            ]);
+        } elseif (! $paymentUrl) {
+            $paymentUrl = $this->appendQueryParams(config('app.frontend_url', ''), [
+                'order' => $order->order_number,
+                'pending' => '1',
+            ]);
+        }
 
         $order->load('items');
 
@@ -82,25 +101,13 @@ class CheckoutController extends Controller
         ], 201);
     }
 
-    /**
-     * Build EPS payment gateway URL.
-     * Set EPS_PAYMENT_GATEWAY_URL in .env (e.g. https://sandboxpg.eps.com.bd/PaymentLink)
-     * and optionally EPS_SUCCESS_URL, EPS_CANCEL_URL for return URLs.
-     * For full integration, replace this with EPS Invoice/Payment Link API call.
-     */
-    private function buildEpsPaymentUrl(Order $order, ?string $successUrl = null, ?string $cancelUrl = null): string
+    private function appendQueryParams(string $url, array $params): string
     {
-        $baseUrl = rtrim(config('services.eps.payment_url', 'https://sandboxpg.eps.com.bd'), '/');
-        $successUrl = $successUrl ?? config('services.eps.success_url', '');
-        $cancelUrl = $cancelUrl ?? config('services.eps.cancel_url', '');
-
-        $params = http_build_query([
-            'order_number' => $order->order_number,
-            'amount' => round($order->total, 2),
-            'success_url' => $successUrl,
-            'cancel_url' => $cancelUrl,
-        ]);
-
-        return $baseUrl . (str_contains($baseUrl, '?') ? '&' : '?') . $params;
+        $params = array_filter($params);
+        if (empty($params)) {
+            return $url;
+        }
+        $separator = str_contains($url, '?') ? '&' : '?';
+        return $url . $separator . http_build_query($params);
     }
 }
