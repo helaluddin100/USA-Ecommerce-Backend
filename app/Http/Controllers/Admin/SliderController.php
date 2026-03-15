@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Slider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class SliderController extends Controller
 {
@@ -45,7 +47,20 @@ class SliderController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('sliders', 'public');
+            $file = $request->file('image');
+
+            $manager = new ImageManager(new Driver());
+            $image = $manager->read($file->getRealPath());
+
+            // Optional: resize/optimize here if needed, e.g.:
+            // $image = $image->scaleDown(width: 1600);
+
+            $filename = 'slider_' . uniqid() . '.webp';
+            $path = 'sliders/' . $filename;
+
+            Storage::disk('public')->put($path, (string) $image->toWebp());
+
+            $data['image'] = $path;
         }
 
         $data['sort_order'] = (int) ($data['sort_order'] ?? 0);
@@ -79,7 +94,21 @@ class SliderController extends Controller
             if ($slider->image) {
                 Storage::disk('public')->delete($slider->image);
             }
-            $data['image'] = $request->file('image')->store('sliders', 'public');
+
+            $file = $request->file('image');
+
+            $manager = new ImageManager(new Driver());
+            $image = $manager->read($file->getRealPath());
+
+            // Optional: resize/optimize here if needed
+            // $image = $image->scaleDown(width: 1600);
+
+            $filename = 'slider_' . uniqid() . '.webp';
+            $path = 'sliders/' . $filename;
+
+            Storage::disk('public')->put($path, (string) $image->toWebp());
+
+            $data['image'] = $path;
         }
 
         $data['sort_order'] = (int) ($data['sort_order'] ?? 0);

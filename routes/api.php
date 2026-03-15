@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\WishlistController;
+use App\Models\Slider;
 
 // Public routes
 Route::post('/login', [AuthController::class, 'login']);
@@ -17,6 +18,26 @@ Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{product}', [ProductController::class, 'show']);
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}', [CategoryController::class, 'show']);
+
+Route::get('/sliders', function () {
+    return Slider::where('is_active', true)
+        ->orderBy('sort_order')
+        ->orderBy('id')
+        ->get()
+        ->map(function (Slider $slider) {
+            return [
+                'id' => $slider->id,
+                'title' => $slider->title,
+                'subtitle' => $slider->subtitle,
+                'description' => $slider->description,
+                'link' => $slider->link,
+                'linkText' => $slider->link_text,
+                'bgClass' => $slider->bg_class,
+                'imageUrl' => $slider->image_url,
+            ];
+        })
+        ->values();
+});
 
 // Protected routes (auth:sanctum)
 Route::middleware('auth:sanctum')->group(function () {
