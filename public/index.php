@@ -12,6 +12,9 @@ if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php'))
 // Register the Composer autoloader...
 require __DIR__.'/../vendor/autoload.php';
 
+// Global helpers (e.g. format_money) — loads even if Composer "files" autoload was not regenerated on deploy.
+require_once __DIR__.'/../app/helpers.php';
+
 // Bootstrap Laravel and handle the request...
 (require_once __DIR__.'/../bootstrap/app.php')
     ->handleRequest(Request::capture());

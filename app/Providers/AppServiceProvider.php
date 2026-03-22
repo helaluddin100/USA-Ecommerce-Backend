@@ -11,7 +11,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Ensures format_money() exists on deploys where Composer "files" autoload was not regenerated.
+        require_once app_path('helpers.php');
     }
 
     /**
