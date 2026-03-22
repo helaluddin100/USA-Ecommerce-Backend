@@ -117,7 +117,7 @@
                         </td>
                         <td class="px-4 py-3 text-sm font-medium text-gray-100">{{ $product->name }}</td>
                         <td class="px-4 py-3 text-xs text-gray-400">{{ $product->category->name ?? '—' }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-200">${{ number_format($product->price, 2) }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-200">{{ format_money($product->price) }}</td>
                         <td class="px-4 py-3 text-xs text-gray-400">{{ $product->stock }}</td>
                         <td class="px-4 py-3">
                             @if ($product->is_active)

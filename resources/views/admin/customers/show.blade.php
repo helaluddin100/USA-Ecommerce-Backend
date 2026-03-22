@@ -59,11 +59,11 @@
                 </div>
                 <div>
                     <label class="text-sm text-gray-600">Total Spent</label>
-                    <p class="text-2xl font-bold text-blue-600">${{ number_format($customer['total_spent'], 2) }}</p>
+                    <p class="text-2xl font-bold text-blue-600">{{ format_money($customer['total_spent']) }}</p>
                 </div>
                 <div>
                     <label class="text-sm text-gray-600">Average Order Value</label>
-                    <p class="text-xl font-semibold text-gray-900">${{ number_format($customer['average_order_value'], 2) }}</p>
+                    <p class="text-xl font-semibold text-gray-900">{{ format_money($customer['average_order_value']) }}</p>
                 </div>
                 <div>
                     <label class="text-sm text-gray-600">Pricing Tier</label>

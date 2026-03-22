@@ -72,19 +72,19 @@
             <div class="p-4 sm:p-6 space-y-2 text-sm">
                 <div class="flex justify-between text-gray-300">
                     <span>Subtotal</span>
-                    <span>${{ number_format($order->subtotal, 2) }}</span>
+                    <span>{{ format_money($order->subtotal) }}</span>
                 </div>
                 <div class="flex justify-between text-gray-300">
                     <span>Shipping</span>
-                    <span>${{ number_format($order->shipping, 2) }}</span>
+                    <span>{{ format_money($order->shipping) }}</span>
                 </div>
                 <div class="flex justify-between text-gray-300">
                     <span>Tax</span>
-                    <span>${{ number_format($order->tax, 2) }}</span>
+                    <span>{{ format_money($order->tax) }}</span>
                 </div>
                 <div class="flex justify-between text-lg font-bold text-white pt-2 border-t border-gray-700">
                     <span>Total</span>
-                    <span>${{ number_format($order->total, 2) }}</span>
+                    <span>{{ format_money($order->total) }}</span>
                 </div>
             </div>
         </div>
@@ -109,8 +109,8 @@
                     <tr>
                         <td class="px-4 py-3 text-sm text-gray-200">{{ $item->product_name }}</td>
                         <td class="px-4 py-3 text-sm text-gray-400 text-right">{{ $item->quantity }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-400 text-right">${{ number_format($item->price, 2) }}</td>
-                        <td class="px-4 py-3 text-sm font-medium text-gray-200 text-right">${{ number_format($item->price * $item->quantity, 2) }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-400 text-right">{{ format_money($item->price) }}</td>
+                        <td class="px-4 py-3 text-sm font-medium text-gray-200 text-right">{{ format_money($item->price * $item->quantity) }}</td>
                     </tr>
                 @endforeach
                 </tbody>
@@ -147,7 +147,7 @@
                             <span class="inline-flex px-2 py-0.5 rounded text-[11px] font-semibold border {{ $phStatusClass }}">{{ $phLabel }}</span>
                         </div>
                         <div class="text-sm">
-                            <span class="font-semibold text-white">${{ number_format($ph->amount, 2) }}</span>
+                            <span class="font-semibold text-white">{{ format_money($ph->amount) }}</span>
                             <span class="text-gray-500"> {{ $ph->currency }}</span>
                         </div>
                     </div>

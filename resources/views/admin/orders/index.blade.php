@@ -92,7 +92,7 @@
                             <span class="text-xs text-gray-500">{{ $order->customer_email ?: optional($order->user)->email ?: '—' }}</span>
                         </td>
                         <td class="px-4 py-3 text-xs text-gray-400">{{ $order->created_at->format('M d, Y H:i') }}</td>
-                        <td class="px-4 py-3 text-sm font-semibold text-gray-200">${{ number_format($order->total, 2) }}</td>
+                        <td class="px-4 py-3 text-sm font-semibold text-gray-200">{{ format_money($order->total) }}</td>
                         <td class="px-4 py-3">
                             @php
                                 $statusClass = match($order->status) {

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('payment_method', 50)->default('eps');
             $table->string('gateway_name', 50)->default('eps');
             $table->decimal('amount', 12, 2);
-            $table->string('currency', 10)->default('USD');
+            $table->string('currency', 10)->default('BDT');
             $table->string('status', 20)->default('pending'); // pending, paid, failed, cancelled
             $table->string('transaction_id', 255)->nullable();
             $table->json('raw_callback')->nullable(); // full callback/request data from gateway

@@ -10,7 +10,7 @@
                 <div>
                     <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Total Revenue</p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-2">
-                        ${{ number_format($stats['total_revenue'], 2) }}</p>
+                        {{ format_money($stats['total_revenue']) }}</p>
                     <p class="text-sm mt-2 flex items-center {{ $stats['revenue_growth'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
                         @if($stats['revenue_growth'] >= 0)
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
@@ -99,7 +99,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Average Order Value</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-2">
-                ${{ number_format($stats['average_order_value'], 2) }}</p>
+                {{ format_money($stats['average_order_value']) }}</p>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Conversion Rate</p>
@@ -120,22 +120,22 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700">
                 <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Total Orders</p>
                 <p class="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">{{ number_format($stats['total_orders']) }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Total amount: <span class="font-semibold text-gray-900 dark:text-gray-100">${{ number_format($stats['total_orders_amount'], 2) }}</span></p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Total amount: <span class="font-semibold text-gray-900 dark:text-gray-100">{{ format_money($stats['total_orders_amount']) }}</span></p>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border-l-4 border-green-500">
                 <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Payment Success</p>
                 <p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">{{ number_format($stats['success_orders_count']) }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Amount: <span class="font-semibold text-green-700 dark:text-green-300">${{ number_format($stats['success_orders_amount'], 2) }}</span></p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Amount: <span class="font-semibold text-green-700 dark:text-green-300">{{ format_money($stats['success_orders_amount']) }}</span></p>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border-l-4 border-red-500">
                 <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Payment Failed</p>
                 <p class="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">{{ number_format($stats['failed_orders_count']) }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Amount: <span class="font-semibold text-red-700 dark:text-red-300">${{ number_format($stats['failed_orders_amount'], 2) }}</span></p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Amount: <span class="font-semibold text-red-700 dark:text-red-300">{{ format_money($stats['failed_orders_amount']) }}</span></p>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700">
                 <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Pending / Cancelled</p>
                 <p class="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">{{ number_format($stats['pending_orders_count'] + $stats['cancelled_orders_count']) }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Pending: ${{ number_format($stats['pending_orders_amount'], 2) }} · Cancelled: ${{ number_format($stats['cancelled_orders_amount'], 2) }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Pending: {{ format_money($stats['pending_orders_amount']) }} · Cancelled: {{ format_money($stats['cancelled_orders_amount']) }}</p>
             </div>
         </div>
     </div>
@@ -193,7 +193,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900 dark:text-gray-300">
-                                        ${{ number_format($customer['revenue'], 2) }}</div>
+                                        {{ format_money($customer['revenue']) }}</div>
                                 </td>
                             </tr>
                         @empty
@@ -237,7 +237,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900 dark:text-gray-300">
-                                        ${{ number_format($product['revenue'], 2) }}</div>
+                                        {{ format_money($product['revenue']) }}</div>
                                 </td>
                             </tr>
                         @empty
@@ -286,7 +286,7 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900 dark:text-gray-300">
-                                    ${{ number_format($order['amount'], 2) }}</div>
+                                    {{ format_money($order['amount']) }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @php
@@ -324,6 +324,7 @@
     @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
         <script>
+            const moneySymbol = @json(config('currency.symbol'));
             document.addEventListener('DOMContentLoaded', function() {
                 // Check if Chart is loaded
                 if (typeof Chart === 'undefined') {
@@ -375,7 +376,7 @@
                                     ticks: {
                                         color: colors.text,
                                         callback: function(value) {
-                                            return '$' + value.toLocaleString();
+                                            return moneySymbol + value.toLocaleString();
                                         }
                                     },
                                     grid: {

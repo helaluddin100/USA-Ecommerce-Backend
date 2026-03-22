@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
  * EPS (Easy Payment System) Gateway – per "EPS Merchant API Integration Guide V5" PDF.
  * Sandbox: https://sandboxpgapi.eps.com.bd  |  Production (V5): https://pgapi.eps.com.bd
  * Hash: HMAC-SHA512(data, Hash Key) then Base64.
- * Note: API docs (V4/V5) do not include a currency parameter; for USD display contact EPS.
+ * Currency is sent per InitializeEPS payload; default BDT (set EPS_CURRENCY if EPS requires otherwise).
  */
 class EpsService
 {
@@ -103,7 +103,7 @@ class EpsService
 
         $url = $this->baseUrl . '/v1/EPSEngine/InitializeEPS';
 
-        $currency = config('services.eps.currency', 'USD');
+        $currency = config('services.eps.currency', 'BDT');
         $payload = [
             'merchantId' => $this->merchantId,
             'storeId' => $this->storeId,

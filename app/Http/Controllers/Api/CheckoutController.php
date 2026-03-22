@@ -45,7 +45,7 @@ class CheckoutController extends Controller
                 'payment_method' => $order->payment_method ?? 'eps',
                 'gateway_name' => 'eps',
                 'amount' => $order->total,
-                'currency' => 'USD',
+                'currency' => config('services.eps.currency', 'BDT'),
                 'status' => $status ?? 'pending',
                 'transaction_id' => $request->query('transaction_id') ?? $request->query('trx_id') ?? $request->input('transaction_id'),
                 'raw_callback' => [
